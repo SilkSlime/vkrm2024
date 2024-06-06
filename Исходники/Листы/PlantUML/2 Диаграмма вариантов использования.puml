@@ -1,0 +1,95 @@
+@startuml Диаграмма вариантов использования
+left to right direction
+skinparam linetype polyline
+skinparam roundcorner 0
+skinparam {
+    DefaultFontName "GOST Type A"
+    BackgroundColor #FFFFFF
+    UsecaseBackgroundColor #FFFFFF
+    UsecaseFontSize 18
+    ArrowFontSize 16
+}
+
+actor "Пользователь" as user
+
+usecase "Просмотр документов" as ViewDocuments
+    usecase "Просмотр статуса обработки" as ViewDocumentProcessingStatusss
+    usecase "Загрузка документов с патентами" as UploadDocuments
+        usecase "Выбор файлов для загрузки" as SelectFilesForUpload
+    usecase "Удаление документов" as DeleteDocuments
+    usecase "Остановка обработки документа" as StopDocumentProcessing
+    usecase "Повторный запуск обработки документа" as RestartDocumentProcessing
+user -- ViewDocuments
+    ViewDocuments ..> ViewDocumentProcessingStatusss : "include"
+    ViewDocuments <.. UploadDocuments : "extend"
+        UploadDocuments ..> SelectFilesForUpload : "include"
+    ViewDocuments <.. DeleteDocuments : "extend"
+    ViewDocuments <.. StopDocumentProcessing : "extend"
+    ViewDocuments <.. RestartDocumentProcessing : "extend"
+
+
+usecase "Просмотр наборов данных" as ViewDatasets
+    usecase "Создание набора данных" as CreateDataset
+    usecase "Выбор диапазона набора данных" as SelectDatasetRange
+    usecase "Добавление фильтра в набор данных" as AddFilterToDataset
+    usecase "Анализ набора данных" as AnalyzeDataset
+    usecase "Скачивание анализа набора данных" as DownloadDatasetAnalysis
+    usecase "Изменение набора данных" as ModifyDataset
+    usecase "Удаление набора данных" as DeleteDataset
+    usecase "Сохранение набора данных" as SaveDataset
+    usecase "Создание модели" as CreateModel
+        usecase "Выбор набора данных" as SelectDataset
+user -- ViewDatasets
+    ViewDatasets <.. CreateDataset : "extend"
+        CreateDataset ..> SelectDatasetRange : "include"
+        CreateDataset ..> AddFilterToDataset : "include"
+        CreateDataset ..> SaveDataset : "include"
+    ViewDatasets <.. ModifyDataset : "extend"
+        ModifyDataset ..> SelectDatasetRange : "include"
+        ModifyDataset ..> AddFilterToDataset : "include"
+        ModifyDataset ..> SaveDataset : "include"
+    ViewDatasets <.. AnalyzeDataset : "extend"
+        AnalyzeDataset <.. DownloadDatasetAnalysis : "extend"
+    ViewDatasets <.. DeleteDataset : "extend"
+    ViewDatasets <.. CreateModel : "extend"
+        CreateModel ..> SelectDataset : "include"
+
+usecase "Просмотр моделей" as ViewModels
+    usecase "Анализ модели" as AnalyzeModel
+        usecase "Скачивание анализа модели" as DownloadModelAnalysis
+    usecase "Удаление модели" as DeleteModel
+    usecase "Остановка построения модели" as StopModelBuilding
+    usecase "Повторный запуск построения модели" as RestartModelBuilding
+    usecase "Создание прогноза" as CreateForecast
+        usecase "Выбор модели" as SelectModel
+        usecase "Выбор набора данных" as SelectDataset
+user -- ViewModels
+    ViewModels <.. AnalyzeModel : "extend"
+        AnalyzeModel <.. DownloadModelAnalysis : "extend"
+    ViewModels <.. DeleteModel : "extend"
+    ViewModels <.. StopModelBuilding : "extend"
+    ViewModels <.. RestartModelBuilding : "extend"
+    ViewModels <.. CreateForecast : "extend"
+        CreateForecast ..> SelectModel : "include"
+        CreateForecast ..> SelectDataset : "include"
+
+usecase "Просмотр прогнозов" as ViewForecasts
+    usecase "Просмотр анализа прогноза" as ViewForecastAnalysis
+    usecase "Скачивание анализа прогноза" as DownloadForecastAnalysis
+    usecase "Удаление прогноза" as DeleteForecast
+    usecase "Остановка прогнозирования" as StopForecasting
+    usecase "Повторный запуск прогнозирования" as RestartForecasting
+user -- ViewForecasts
+    ViewForecasts <.. ViewForecastAnalysis : "extend"
+        ViewForecastAnalysis <.. DownloadForecastAnalysis : "extend"
+    ViewForecasts <.. DeleteForecast : "extend"
+    ViewForecasts <.. StopForecasting : "extend"
+    ViewForecasts <.. RestartForecasting : "extend"
+
+usecase "Просмотр настроек системы" as ViewSystemSettings
+    usecase "Изменение настроек системы" as ChangeSystemSettings
+    usecase "Сохранение настроек системы" as SaveSystemSettings
+user -- ViewSystemSettings
+    ViewSystemSettings <.. ChangeSystemSettings : "extend"
+        ChangeSystemSettings ..> SaveSystemSettings : "include"
+@enduml

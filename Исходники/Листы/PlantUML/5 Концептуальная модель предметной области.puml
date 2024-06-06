@@ -1,0 +1,116 @@
+@startuml Концептуальная модель предметной области
+hide circle
+skinparam linetype ortho
+' skinparam linetype polyline
+skinparam roundcorner 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    FontName "GOST Type A"
+    AttributeFontName "GOST Type A"
+    ArrowFontName "GOST Type A"
+    AttributeFontSize 16
+}
+
+entity "Документ" as document {
+  Файл документа
+}
+entity "Патент" as patent {
+  Текст патента
+  Дата публикации
+}
+entity "Класс IPC" as ipc {
+  Номер класса
+  Дата присвоения
+}
+entity "Эмбеддинг патента" as embedding {
+  Идентефикатор менеджера векторизации
+  Идентефикатор патента
+  Векторное представление патента
+}
+entity "Набор данных" as dataset {
+  Идентефикатор менеджера векторизации
+  Дата выборки до
+  Дата выборки после
+}
+entity "Фильтр набора данных" as dataset_filter {
+  Идентефикатор набора данных
+  Шаблон патентного класса
+  Максимальное количество патентов
+}
+entity "Модель" as model {
+  Идентефикатор набора данных
+  Дата создания
+  Порог кластеризации
+}
+entity "Кластер" as cluster {
+  Идентефикатор модели
+}
+entity "Ключевое слово" as keyword {
+  Идентефикатор кластера
+  Текст ключевого слова
+}
+entity "Прогнозная модель" as prediction {
+  Идентефикатор набора данных
+  Дата создания
+  Идентефикатор модели
+}
+entity "Отчет прогнозирования" as report {
+  Идентефикатор прогнозной модели
+  Текст прогноза
+}
+
+entity "Менеджер оценки" as evaluator {
+  Идентефикатор модели
+  --
+  Оценить прогнозную модель
+}
+entity "Менеджер векторизации" as vectorizer {
+  Идентефикатор патента
+  --
+  Выполнить векторизацию
+}
+entity "Менеджер кластеризации" as clusterizer {
+  Идентефикатор набора данных
+  --
+  Выполнить кластеризацию
+}
+entity "Менеджер прогнозирования" as predictor {
+  Идентефикатор прогнозной модели
+  --
+  Сформировать отчет о прогнозировании
+}
+
+document "1 " --> "1...*" patent : "содержит"
+
+patent "1 " --> "1...*" ipc  : "имеет"
+patent "0...1" --> "0..*" patent : "цитирует"
+patent "1 " --> "1 " embedding : "соответствует"
+
+predictor "1 " --> "1...*" prediction : "формирует"
+predictor "1 "-->"1...*" model : "использует"
+predictor "1 "-->"1...*" report : "формирует"
+
+dataset "1 "-->"1...*" embedding : "содержит"
+dataset "1 "-->"0...*" dataset_filter : "имеет"
+
+model "1 "-->"1...*" cluster : "содержит"
+model "1 "-->"1...*" dataset : "основана на"
+
+cluster "1 "-->"1...*" embedding : "содержит"
+cluster "1 "-->"1...*" keyword : "содержит"
+
+prediction "1 "-->"1...*" cluster : "содержит"
+prediction "1 "--"1 " model : "основан на"
+prediction "1 "-->"1...*" dataset : "основан на"
+
+vectorizer "1 "-->"1...*" patent : "использует"
+vectorizer "1 "-->"1...*" embedding : "формирует"
+
+clusterizer "1 "-->"1...*" cluster : "формирует"
+clusterizer "1 "-->"1...*" model : "использует"
+
+evaluator "1 "-->"1...*" model : "использует"
+evaluator "1 "-->"1 " clusterizer : "управляет"
+
+@enduml
+

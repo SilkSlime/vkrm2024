@@ -1,0 +1,243 @@
+@startuml Class Diagram
+
+hide circle
+' left to right direction
+' skinparam linetype ortho
+skinparam roundcorner 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    FontName "GOST Type A"
+    AttributeFontName "GOST Type A"
+    ArrowFontName "GOST Type A"
+    AttributeFontSize 24
+    ArrowFontSize 24
+}
+
+package "User Interface Module" as P1 {
+    class FileUploadManager {
+        + files: list[CSVFile]
+        + __init__(self, files: list[CSVFile])
+        + get_files(self): list[CSVFile]
+        + set_files(self, files: list[CSVFile]): None
+        + upload_files(self, files: list[CSVFile]): None
+    }
+    class DataSetManager {
+        + data_sets: list[DataSet]
+        + __init__(self)
+        + get_data_sets(self): list[DataSet]
+        + create_data_set(self, filters: FilterCriteria): DataSet
+    }
+    class ModelManager {
+        + models: list[Model]
+        + __init__(self)
+        + get_models(self): list[Model]
+        + create_model(self, data_set: DataSet): Model
+        + create_prediction_model(self, data_set: DataSet, base_model: Model): PredictionModel
+    }
+    class VisualizationManager {
+        + generate_landscape(self, model: Model): Graph
+        + generate_prediction_landscape(self, pred_model: PredictionModel): Graph
+        + generate_association_matrix(self, model: Model, pred_model: PredictionModel): Matrix
+    }
+    class ReportGenerator {
+        + generate_report(self, assoc_matrix: Matrix, threshold: float): Report
+    }
+}
+
+package "Model Building Module" as P2 {
+    class CSVParser {
+        + __init__(self)
+        + parse(self, file: CSVFile): list[Patent]
+    }
+    class PatentProcessor {
+        + __init__(self)
+        + process_patents(self, patents: list[Patent]): None
+    }
+    class Vectorizer {
+        + __init__(self)
+        + vectorize(self, patent: Patent): Vector
+    }
+    class Clustering {
+        + __init__(self)
+        + dbscan(self, vectors: list[Vector], eps: float): list[Cluster]
+        + optimize_threshold(self, vectors: list[Vector]): float
+    }
+    class Association {
+        + __init__(self)
+        + associate_clusters_with_classes(self, clusters: list[Cluster], classes: list[IPCClass]): dict
+    }
+}
+
+package "Visualization Module" as P3 {
+    class UMAPVisualizer {
+        + __init__(self)
+        + visualize(self, clusters: list[Cluster]): Graph
+    }
+    class LDAKeywordGenerator {
+        + __init__(self)
+        + generate_keywords(self, cluster: Cluster): list[str]
+    }
+}
+
+package "Reporting Module" as P4 {
+    class HypothesisGenerator {
+        + __init__(self)
+        + generate_hypotheses(self, matrix: Matrix, threshold: float): list[Hypothesis]
+    }
+    class Report {
+        - hypotheses: list[Hypothesis]
+        + __init__(self, hypotheses: list[Hypothesis])
+        + display(self): None
+    }
+}
+
+class CSVFile {
+    - path: str
+    + __init__(self, path: str)
+    + get_path(self): str
+    + set_path(self, path: str): None
+}
+
+class Patent {
+    - ga: str
+    - title: str
+    - novelty: str
+    - app_date: date
+    - ipc_codes: list[str]
+    - citations: list[str]
+    + __init__(self, ga: str, title: str, novelty: str, app_date: date, ipc_codes: list[str], citations: list[str])
+    + get_ga(self): str
+    + get_title(self): str
+    + get_novelty(self): str
+    + get_app_date(self): date
+    + get_ipc_codes(self): list[str]
+    + get_citations(self): list[str]
+}
+
+class DataSet {
+    - patents: list[Patent]
+    - filter_criteria: FilterCriteria
+    + __init__(self, patents: list[Patent], filter_criteria: FilterCriteria)
+    + get_patents(self): list[Patent]
+    + get_filter_criteria(self): FilterCriteria
+}
+
+class FilterCriteria {
+    - start_date: date
+    - end_date: date
+    - ipc_pattern: str
+    + __init__(self, start_date: date, end_date: date, ipc_pattern: str)
+    + get_start_date(self): date
+    + get_end_date(self): date
+    + get_ipc_pattern(self): str
+}
+
+class Model {
+    - data_set: DataSet
+    - clusters: list[Cluster]
+    - cluster_threshold: float
+    - adjusted_rand_index: float
+    + __init__(self, data_set: DataSet, clusters: list[Cluster], cluster_threshold: float, adjusted_rand_index: float)
+    + get_data_set(self): DataSet
+    + get_clusters(self): list[Cluster]
+    + get_cluster_threshold(self): float
+    + get_adjusted_rand_index(self): float
+}
+
+class PredictionModel {
+    - base_model: Model
+    - data_set: DataSet
+    - clusters: list[Cluster]
+    + __init__(self, base_model: Model, data_set: DataSet, clusters: list[Cluster])
+    + get_base_model(self): Model
+    + get_data_set(self): DataSet
+    + get_clusters(self): list[Cluster]
+}
+
+class Cluster {
+    - patents: list[Patent]
+    - keywords: list[str]
+    + __init__(self, patents: list[Patent], keywords: list[str])
+    + get_patents(self): list[Patent]
+    + get_keywords(self): list[str]
+}
+
+class Vector {
+    - data: list[float]
+    + __init__(self, data: list[float])
+    + get_data(self): list[float]
+}
+
+class IPCClass {
+    - code: str
+    + __init__(self, code: str)
+    + get_code(self): str
+}
+
+class Matrix {
+    - data: dict
+    + __init__(self, data: dict)
+    + get_data(self): dict
+}
+
+class Graph {
+    - nodes: list
+    - edges: list
+    + __init__(self, nodes: list, edges: list)
+    + get_nodes(self): list
+    + get_edges(self): list
+}
+
+class Hypothesis {
+    - description: str
+    - probability: float
+    + __init__(self, description: str, probability: float)
+    + get_description(self): str
+    + get_probability(self): float
+}
+
+
+FileUploadManager -> CSVParser : uses
+CSVParser -r-> PatentProcessor : uses
+PatentProcessor -d-> Vectorizer : uses
+Vectorizer -l-> Clustering : uses
+Clustering --> Association : uses
+Association -d-> Model : creates
+
+DataSetManager --> DataSet : creates
+ModelManager --> Model : creates
+ModelManager --> PredictionModel : creates
+
+VisualizationManager --> UMAPVisualizer : uses
+VisualizationManager --> LDAKeywordGenerator : uses
+VisualizationManager --> Matrix : creates
+
+ReportGenerator --> Report : creates
+
+HypothesisGenerator --> Report : uses
+
+DataSet --> Patent : contains
+DataSet --> FilterCriteria : uses
+
+Model --> DataSet : uses
+Model --> Cluster : contains
+
+PredictionModel --> Model : extends
+PredictionModel --> DataSet : uses
+PredictionModel --> Cluster : contains
+
+Cluster --> Patent : contains
+Cluster --> IPCClass : associates
+Cluster --> Vector : uses
+
+Matrix --> Cluster : associates
+
+Graph --> Cluster : uses
+
+Hypothesis --> Matrix : uses
+
+P1 -[hidden]-> P2
+P2 -[hidden]-> P3
+P3 -[hidden]-> P4
+
+@enduml

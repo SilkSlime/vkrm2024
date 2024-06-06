@@ -1,0 +1,135 @@
+// Загруженные документы
+Table documents {
+    id int [pk, increment]
+    filename varchar
+}
+
+// Настройки системы
+Table settings {
+    id int [pk, increment]
+    name varchar
+    value varchar
+}
+
+// Патенты
+Table patents {
+    id int [pk, increment]
+    text varchar
+    date_appeared date
+}
+
+// Присвоенные классы IPC
+Table ipc_classes {
+    id int [pk, increment]
+    class_code varchar
+    patent_id int [ref: > patents.id]
+    date_assigned date
+}
+
+// Цитирования
+Table citations {
+    id int [pk, increment]
+    cited_patent_id int [ref: > patents.id]
+    citing_patent_id int [ref: > patents.id]
+}
+
+// Доступные векторизаторы
+Table vectorizers {
+    id int [pk, increment]
+    name varchar
+    filename varchar
+    type varchar [ref: > vectorizer_types.name]
+}
+
+// Типы векторизаторов (text, image, etc.)
+Table vectorizer_types {
+    name varchar [pk]
+}
+
+// Эмбеддинги патентов
+Table embeddings {
+    id int [pk, increment]
+    vectorizer_id int [ref: > vectorizers.id]
+    patent_id int [ref: > patents.id]
+    embedding json
+}
+
+// Датасеты
+Table datasets {
+    id int [pk, increment]
+    vectorizer_id int [ref: > vectorizers.id]
+    from_date date
+    to_date date
+}
+
+// Фильтры для датасетов
+Table datasets_ipc_filter {
+    id int [pk, increment]
+    dataset_id int [ref: > datasets.id]
+    ipc_wildcard varchar
+    limit int
+}
+
+// Модели
+Table models {
+    id int [pk, increment]
+    dataset_id int [ref: > datasets.id]
+    created_at date
+    threshold float
+}
+
+// Кластеры модели
+Table clusters {
+    id int [pk, increment]
+    model_id int [ref: > models.id]
+    cluster_id int
+}
+
+// Патенты в кластерах
+Table cluster_patents {
+    id int [pk, increment]
+    cluster_id int [ref: > clusters.id]
+    patent_id int [ref: > patents.id]
+}
+
+// Ключевые слова кластеров
+Table cluster_keywords {
+    id int [pk, increment]
+    cluster_id int [ref: > clusters.id]
+    keyword varchar
+}
+
+// Прогнозные модели
+Table predictions {
+    id int [pk, increment]
+    dataset_id int [ref: > datasets.id]
+    created_at date
+    model_id int [ref: > models.id]
+}
+
+// Кластеры в прогнозах
+Table prediction_clusters {
+    id int [pk, increment]
+    prediction_id int [ref: > predictions.id]
+    cluster_id int [ref: > clusters.id]
+}
+
+// Патенты в прогнозах
+Table prediction_cluster_patents {
+    id int [pk, increment]
+    prediction_id int [ref: > predictions.id]
+    patent_id int [ref: > patents.id]
+    cluster_id int [ref: > clusters.id]
+}
+
+Table prediction_keywords {
+    id int [pk, increment]
+    prediction_id int [ref: > predictions.id]
+    keyword varchar
+}
+
+Table prediction_report {
+    id int [pk, increment]
+    prediction_id int [ref: > predictions.id]
+    text varchar
+}
